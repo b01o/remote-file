@@ -1,3 +1,5 @@
+[![crates.io](https://img.shields.io/crates/v/remote-file)](https://crates.io/crates/remote-file)
+[![docs.rs](https://img.shields.io/docsrs/remote-file)](https://docs.rs/remote-file)
 
 ## A file implementation for remote assets
 
@@ -42,4 +44,24 @@ async fn main() {
     assert_eq!(pos, 1024);
 }
 ```
+
+### Notes
+* The `HttpFile` itself will try to make as few network requests as possible, i.e., it will not make a new request if the seek position is the same as the current position.
+* Keep in mind that seeking in a remote file is not as efficient as seeking in a local file, as it requires additional network requests, which brings orders of magnitude more latency. If you need to perform small seeks frequently, consider reading a larger chunk of data into memory and seeking within that buffer instead.
+* It does not implement caching, if you need caching, consider wrapping it to a new type and implementing your own caching logic.
+* It does not implement `AsyncWrite`, as writing to a remote file over HTTP is not supported.
+
+### Plans
+* Supports more protocols, e.g., FTP, S3, etc.
+* Implement caching layer.
+* More robust retry mechanism.
+
+#### License
+<sup>
+This project is licensed under the MIT License.
+See the <a href="LICENSE">LICENSE</a> file for details.
+</sup>
+
+
+
 

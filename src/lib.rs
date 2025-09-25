@@ -25,12 +25,12 @@ fn new_request(client: &reqwest::Client, url: reqwest::Url, pos: u64) -> Request
 
 /// An remote file accessed over HTTP.
 /// Implements `AsyncRead` and `AsyncSeek` traits.
-/// 
+///
 /// * Supports seeking and reading at arbitrary positions.
 /// * Uses HTTP Range requests to fetch data.
 /// * Handles transient network errors with retries.
 /// * `stream_position()` is cheap, as it is tracked locally.
-/// 
+///
 pub struct HttpFile {
     client: reqwest::Client,
 
@@ -86,13 +86,13 @@ impl HttpFile {
     }
     /// Mime type of the file, if present
     pub fn mime(&self) -> Option<&str> {
-        self.mime.as_deref() 
+        self.mime.as_deref()
     }
 }
 
 impl HttpFile {
     /// Create a new `HttpFile` from a `reqwest::Client` and a file URL.
-    /// 
+    ///
     /// Arguments:
     /// * `client`: A `reqwest::Client` instance to make HTTP requests.
     /// * `url`: The URL of the file to access.

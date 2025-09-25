@@ -1,9 +1,14 @@
 [package]
 name = "remote-file"
-version = "0.1.0"
+license = "MIT"
+version = "0.1.1"
+authors = ["b0lo <b01o@proton.me>"]
+repository = "https://github.com/b01o/remote-file"
 description = "A file-like object for reading remote files over HTTP with range requests."
 edition = "2024"
-license = "MIT"
+
+keywords = ["file", "http", "remote", "async"]
+categories = ["asynchronous", "network-programming"]
 
 [dependencies]
 bytes = "1.10"

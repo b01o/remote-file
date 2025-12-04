@@ -1,7 +1,7 @@
 [package]
 name = "remote-file"
 license = "MIT"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["b0lo <b01o@proton.me>"]
 repository = "https://github.com/b01o/remote-file"
 description = "A file-like object for reading remote files over HTTP with range requests."

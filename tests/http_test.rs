@@ -107,3 +107,90 @@ async fn random_file_read() {
         assert_eq!(buf1, buf2, "file content should be the same at pos {}", pos);
     }
 }
+
+#[tokio::test]
+async fn seek_to_end_of_file() {
+    let workdir = std::env::temp_dir();
+    let file_name = "seek_eof_test_file.bin";
+    let file_path = workdir.join(file_name);
+
+    // create test file
+    create_test_file(&file_path);
+    let mut local_file = tokio::fs::File::open(&file_path).await.unwrap();
+
+    let addr = SocketAddr::from(([0, 0, 0, 0], 13568));
+    let url = format!("http://localhost:13568/files/{}", file_name);
+
+    // start file server
+    let workdir_str = workdir.to_string_lossy().into_owned();
+    tokio::spawn(async move {
+        setup_file_server(workdir_str, addr).await;
+        panic!("file server exited unexpectedly");
+    });
+
+    let client = reqwest::Client::new();
+    // Wait for server to be ready
+    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+
+    let mut http_file = HttpFile::new(client, &url).await.unwrap();
+    let file_length = http_file.content_length().unwrap();
+
+    // Test 1: Seek to EOF (file_length) should succeed
+    let local_pos = local_file
+        .seek(std::io::SeekFrom::Start(file_length))
+        .await
+        .unwrap();
+    let remote_pos = http_file
+        .seek(std::io::SeekFrom::Start(file_length))
+        .await
+        .unwrap();
+    assert_eq!(local_pos, file_length, "local file should seek to EOF");
+    assert_eq!(remote_pos, file_length, "remote file should seek to EOF");
+    assert_eq!(
+        local_pos, remote_pos,
+        "both files should be at the same position"
+    );
+
+    // Test 2: Reading at EOF should return 0 bytes
+    let mut buf1 = [0u8; 10];
+    let mut buf2 = [0u8; 10];
+    let local_bytes = local_file.read(&mut buf1).await.unwrap();
+    let remote_bytes = http_file.read(&mut buf2).await.unwrap();
+    assert_eq!(local_bytes, 0, "local file should read 0 bytes at EOF");
+    assert_eq!(remote_bytes, 0, "remote file should read 0 bytes at EOF");
+    assert_eq!(
+        local_bytes, remote_bytes,
+        "both should read the same number of bytes"
+    );
+
+    // Test 3: Seek beyond EOF should fail for both
+    let _local_result = local_file
+        .seek(std::io::SeekFrom::Start(file_length + 1))
+        .await;
+    let remote_result = http_file
+        .seek(std::io::SeekFrom::Start(file_length + 1))
+        .await;
+
+    // For local file, seeking beyond EOF might succeed (depends on implementation)
+    // For remote file, it should fail
+    assert!(
+        remote_result.is_err(),
+        "remote file should fail when seeking beyond EOF"
+    );
+
+    // Test 4: Seek to EOF using SeekFrom::End(0)
+    let local_pos = local_file.seek(std::io::SeekFrom::End(0)).await.unwrap();
+    let remote_pos = http_file.seek(std::io::SeekFrom::End(0)).await.unwrap();
+    assert_eq!(
+        local_pos, file_length,
+        "local file should be at EOF using End(0)"
+    );
+    assert_eq!(
+        remote_pos, file_length,
+        "remote file should be at EOF using End(0)"
+    );
+
+    // Test 5: Reading after seeking to end should still return 0 bytes
+    let remote_bytes = http_file.read(&mut buf2).await.unwrap();
+    assert_eq!(remote_bytes, 0, "should still read 0 bytes at EOF");
+}

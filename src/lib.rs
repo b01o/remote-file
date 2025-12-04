@@ -147,6 +147,13 @@ impl AsyncRead for HttpFile {
         cx: &mut std::task::Context<'_>,
         buf: &mut tokio::io::ReadBuf<'_>,
     ) -> std::task::Poll<std::io::Result<()>> {
+        // Check if we're at or beyond the end of file
+        if let Some(content_length) = self.content_length {
+            if self.pos >= content_length.get() {
+                return std::task::Poll::Ready(Ok(()));
+            }
+        }
+
         if let Some(last_chunk) = self.last_chunk.take() {
             let size = last_chunk.len().min(buf.remaining());
             buf.put_slice(&last_chunk[..size]);
@@ -297,6 +304,18 @@ impl AsyncSeek for HttpFile {
         let Some(seek_pos) = self.seek else {
             return std::task::Poll::Ready(Ok(self.pos));
         };
+
+        // If seeking to or beyond EOF, just update position without making a request
+        if let Some(content_length) = self.content_length {
+            if seek_pos >= content_length.get() {
+                self.pos = seek_pos;
+                self.seek = None;
+                self.request = None;
+                self.response = None;
+                self.last_chunk = None;
+                return std::task::Poll::Ready(Ok(self.pos));
+            }
+        }
 
         if self.request.is_none() || self.request.as_ref().unwrap().0 != seek_pos {
             log::debug!(bytes_from = self.pos ; "GET {}", self.url);

@@ -1,7 +1,7 @@
 [package]
 name = "remote-file"
 license = "MIT"
-version = "0.1.2"
+version = "0.2.0"
 authors = ["b0lo <b01o@proton.me>"]
 repository = "https://github.com/b01o/remote-file"
 description = "A file-like object for reading remote files over HTTP with range requests."
@@ -11,16 +11,16 @@ keywords = ["file", "http", "remote", "async"]
 categories = ["asynchronous", "network-programming"]
 
 [dependencies]
-bytes = "1.10"
+bytes = "1.11"
 futures-util = "0.3.31"
-log = { version = "0.4.28", features = ["kv"] }
-reqwest = { version = "0.12", features = ["stream"] }
-tokio = { version = "1.47", default-features = false, features = [] }
+log = { version = "0.4.29", features = ["kv"] }
+reqwest = { version = "0.13", features = ["stream"] }
+tokio = { version = "1.49", default-features = false, features = [] }
 
 [dev-dependencies]
-rand = "0.9.2"
-tokio = { version = "1.47", features = ["full"] }
+rand = "0.10"
+tokio = { version = "1.49", features = ["full"] }
 axum = "0.8"
-tower-http = { version = "0.6.6", features = ["fs"] }
+tower-http = { version = "0.6", features = ["fs"] }
 
 

@@ -14,7 +14,7 @@ categories = ["asynchronous", "network-programming"]
 bytes = "1.11"
 futures-util = "0.3.31"
 log = { version = "0.4.29", features = ["kv"] }
-reqwest = { version = "0.13", features = ["stream"] }
+reqwest = { version = "0.13", default-features = false, features = ["stream"] }
 tokio = { version = "1.49", default-features = false, features = [] }
 
 [dev-dependencies]

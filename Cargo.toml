@@ -4,7 +4,7 @@ license = "MIT"
 version = "0.2.1"
 authors = ["b0lo <b01o@proton.me>"]
 repository = "https://github.com/b01o/remote-file"
-description = "A file-like object for reading remote files over HTTP with range requests."
+description = "Access file over http like std::fs::File, asynchronously"
 edition = "2024"
 
 keywords = ["file", "http", "remote", "async"]
@@ -22,5 +22,3 @@ rand = "0.10"
 tokio = { version = "1.49", features = ["full"] }
 axum = "0.8"
 tower-http = { version = "0.6", features = ["fs"] }
-
-
